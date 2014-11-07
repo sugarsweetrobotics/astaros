@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+   <extension point="com.change_vision.astah.ui.actionSets">
+      <actionSet
+            label="%action_set_label"
+            visible="true"
+            id="net.ysuga.roscore.actionSet">
+         <menu
+               id="roscore"
+               label="%menu_group"
+               path="tool/roscore">
+         </menu>
+         <action
+			   label="%menu_roscore_label"
+               icon="icons/sample.gif"
+               class="net.ysuga.RoscoreAction"
+               tooltip="%menu_roscore_tooltip"
+               menubarPath="tool/roscore/"
+               id="roscore">
+         </action>
+		 <action
+			   label="%menu_import_value_label"
+               icon="icons/sample.gif"
+               class="net.ysuga.ImportValueAction"
+               tooltip="%menu_import_value_tooltip"
+               menubarPath="tool/roscore/"
+               id="roscore">
+         </action>
+     </actionSet>
+     <view
+       id="net.ysuga.RoscoreTabView"
+       type="extraTab"
+       class="net.ysuga.RoscoreTabView" />
+   </extension>
+</plugin>
