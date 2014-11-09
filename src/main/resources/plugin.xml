@@ -24,7 +24,15 @@
                class="net.ysuga.ImportValueAction"
                tooltip="%menu_import_value_tooltip"
                menubarPath="tool/roscore/"
-               id="roscore">
+               id="import_value">
+         </action>
+         <action
+			   label="%menu_export_system_label"
+               icon="icons/sample.gif"
+               class="net.ysuga.ExportSystemAction"
+               tooltip="%menu_export_system_tooltip"
+               menubarPath="tool/roscore/"
+               id="export_system">
          </action>
      </actionSet>
      <view

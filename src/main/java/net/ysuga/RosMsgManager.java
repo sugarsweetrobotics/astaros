@@ -8,12 +8,11 @@ import com.change_vision.jude.api.inf.editor.SysmlModelEditor;
 import com.change_vision.jude.api.inf.editor.TransactionManager;
 import com.change_vision.jude.api.inf.exception.InvalidEditingException;
 import com.change_vision.jude.api.inf.model.IModel;
-import com.change_vision.jude.api.inf.model.INamedElement;
 import com.change_vision.jude.api.inf.model.IPackage;
 import com.change_vision.jude.api.inf.model.IValueType;
 import com.change_vision.jude.api.inf.model.IValueTypeProperty;
 
-public class RosMsg {
+public class RosMsgManager {
 
 	static String[] primitiveTypes = { "bool", "int8", "uint8", "int16",
 		"uint16", "int32", "uint32", "int64", "uint64", "float32",
@@ -131,7 +130,7 @@ public class RosMsg {
 					newPackage = null;
 				}
 				if (newPackage == null) {
-					newPackage = getPackageFromModel(currentPackage, tokens[i]);
+					newPackage = AstahUtility.getPackageFromModel(currentPackage, tokens[i]);
 				}
 
 				currentPackage = newPackage;
@@ -140,8 +139,8 @@ public class RosMsg {
 			
 			IValueType value = sysmlModelEditor.createValueType(currentPackage, tokens[tokens.length-1]);
 			for(NamedValue nv : parser.parameters) {
-				RosMsg.addValueType(model, nv.getFullType());
-				IValueType vt = getValueTypeFromModel(model, nv.getFullType());
+				RosMsgManager.addValueType(model, nv.getFullType());
+				IValueType vt = AstahUtility.getValueTypeFromModel(model, nv.getFullType());
 				IValueTypeProperty vtp = sysmlModelEditor.createValueTypeProperty(value, nv.value, vt);
 				String[][] arg = new String[1][1];
 				arg[0][0] = nv.getMultiplicity();
@@ -162,38 +161,7 @@ public class RosMsg {
 		return true;
 	}
 	
-	static public IPackage getPackageFromModel(IPackage currentPackage, String name) {
-		for(INamedElement ne : currentPackage.getOwnedElements()) {
-			if(ne instanceof IPackage) {
-				IPackage p = (IPackage)ne;
-				if (p.getName().equals(name)) {
-					return p;
-				}
-			}
-		}
-		return null;
-	}
+
 	
-	static public IValueType getValueTypeFromModel(IModel model, String name) {
-		String[] tokens = name.split("/");
-		IPackage currentPackage = (IPackage) model;
-		
-		for(int i = 0;i < tokens.length-1;i++) {
-			currentPackage = getPackageFromModel(currentPackage, tokens[i]);
-			if(currentPackage == null) {
-				return null;
-			}
-		}
-		
-		for(INamedElement ne : currentPackage.getOwnedElements()) {
-			if(ne instanceof IValueType) {
-				IValueType v = (IValueType)ne;
-				if (v.getName().equals(tokens[tokens.length-1])) {
-					return v;
-				}
-			}
-		}
-		return null;
-		
-	}
+
 }

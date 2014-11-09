@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- local machine already has a definition by default.
+       This tag overrides the default definition with
+       specific ROS_ROOT and ROS_PACKAGE_PATH values -->
+  <machine name="local_alt" address="localhost" default="true" ros-root="/u/user/ros/ros/" ros-package-path="/u/user/ros/ros-pkg" />
+
+
+#foreach( $n in ${roslaunch.nodeInstances} )
+  <node pkg="${n.node.packageName}" type="${n.node.executableName}" name="${n.name}">
+#foreach( $e in ${n.params.entrySet()} )
+    <param name="${e.key}" value="${e.value}" />
+#end
+#foreach( $e in ${n.remaps.entrySet()} )
+    <remap from="${e.key}" to="${e.value}" />
+#end
+  </node>
+#end
+
+</launch>

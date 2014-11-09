@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import sys, os, traceback
+
+import roslib
+import rospy
+import tf
+from tf import transformations
+
+#foreach( $t in ${node.importTopic} )
+from ${t.package}.msg import ${t.type}
+#end
+
+class ${node.name}_node():
+    
+    def on_execute(self):
+        pass
+        
+    def __init__(self):
+        """
+        Constructor
+        """
+        rospy.init_node('${node.name}')
+        
+        self._execute_rate = 20.0
+
+        # Parameters
+#foreach( $p in node.params )
+        self._param_${p.name} = rospy.get_param("~${p.name}", "${p.defaultValue}")
+#end
+
+        # Topics
+#foreach( $t in node.outTopics )
+        self._${t.name}Out = rospy.Publisher('${t.name}', ${t.type})
+#end
+
+#foreach( $t in node.inTopics )
+        self._${t.name}In = rospy.Subscriber('${t.name}', ${t.type}, self.on_${t.name})
+#end
+        #main loop
+        rate = rospy.Rate(self._execute_rate) 
+        while not rospy.is_shutdown():
+            try:
+                self.on_execute()
+                rate.sleep()
+            except scalemodel.protocol.FormatError, e:
+                traceback.print_exc()
+            pass
+
+#foreach( $t in node.inTopics )
+    def on_${t.name}(self, msg):
+        # print msg
+        pass
+#end
+
+if __name__ == '__main__':
+    n = ${node.name}_node()

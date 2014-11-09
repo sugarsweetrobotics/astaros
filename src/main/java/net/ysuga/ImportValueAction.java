@@ -23,14 +23,14 @@ public class ImportValueAction implements IPluginActionDelegate {
 			AstahAPI api = AstahAPI.getAstahAPI();
 			ProjectAccessor projectAccessor = api.getProjectAccessor();
 			IModel model = projectAccessor.getProject();
-			RosMsg.initializePrimitiveTypes(model);
+			RosMsgManager.initializePrimitiveTypes(model);
 			
 			String str = JOptionPane.showInputDialog(window.getParent(),
 					"title", "msg");
 			if (str != null) {
 
 				TransactionManager.beginTransaction();
-				RosMsg.addValueType(model, str);
+				RosMsgManager.addValueType(model, str);
 				TransactionManager.endTransaction();
 				
 			}
