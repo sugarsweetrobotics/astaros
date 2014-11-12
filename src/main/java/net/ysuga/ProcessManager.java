@@ -74,7 +74,7 @@ public class ProcessManager {
 			List<String> arg = new ArrayList<String>();
 			arg.add("python");
 			arg.add("-u");
-			arg.add("/opt/ros/indigo/bin/roscore");
+			arg.add(getROSPath() + "roscore");
 			pb = new ProcessBuilder(arg);
 			// pb.redirectErrorStream(true);
 			try {
@@ -91,12 +91,16 @@ public class ProcessManager {
 		return roscore;
 	}
 
+	private static String getROSPath() {
+		return "/opt/ros" + System.getenv("ROS_DISTRO");
+	}
+	
 	public static String rosmsg_show(String fullname) {
 		StringBuilder output = new StringBuilder();
 		List<String> arg = new ArrayList<String>();
 		arg.add("python");
 		arg.add("-u");
-		arg.add("/opt/ros/indigo/bin/rosmsg");
+		arg.add(getROSPath() + "rosmsg");
 		arg.add("show");
 		arg.add(fullname);
 		ProcessBuilder pb = new ProcessBuilder(arg);

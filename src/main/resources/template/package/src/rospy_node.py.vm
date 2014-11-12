@@ -9,12 +9,20 @@ import tf
 from tf import transformations
 
 #foreach( $t in ${node.importTopic} )
-from ${t.package}.msg import ${t.type}
+from ${t.type.packageName}.msg import ${t.type.name}
 #end
 
 class ${node.name}_node():
-    
+    """
+    """
     def on_execute(self):
+#foreach( $t in ${node.outTopics} )
+        """ 
+        Periodically Called Routine
+        """
+        # self._${t.name} = ${t.type.name}
+        # self._${t.name}Out.publish(self._${t.name})
+#end
         pass
         
     def __init__(self):
@@ -23,23 +31,26 @@ class ${node.name}_node():
         """
         rospy.init_node('${node.name}')
         
-        self._execute_rate = 20.0
-
+        # Periodic Execution Rate (astah add this parameter by default.)
+        self._param_exec_rate = rospy.get_param("~exec_rate", 20.0)
+        
         # Parameters
-#foreach( $p in node.params )
-        self._param_${p.name} = rospy.get_param("~${p.name}", "${p.defaultValue}")
+#foreach( $p in ${node.params} )
+        self._param_${p.name} = rospy.get_param("~${p.name}", ${p.defaultValue})
 #end
 
-        # Topics
-#foreach( $t in node.outTopics )
-        self._${t.name}Out = rospy.Publisher('${t.name}', ${t.type})
+        # Publishing Topics
+#foreach( $t in ${node.outTopics} )
+        self._${t.name}Out = rospy.Publisher('${t.name}', ${t.type.name}, queue_size=10)
+        self._${t.name} = ${t.type.name}
 #end
-
-#foreach( $t in node.inTopics )
-        self._${t.name}In = rospy.Subscriber('${t.name}', ${t.type}, self.on_${t.name})
+        # Subscribing Topics
+#foreach( $t in ${node.inTopics} )
+        self._${t.name}In = rospy.Subscriber('${t.name}', ${t.type.name}, self.on_${t.name})
+        self._${t.name} = ${t.type.name}
 #end
         #main loop
-        rate = rospy.Rate(self._execute_rate) 
+        rate = rospy.Rate(self._param_execute_rate) 
         while not rospy.is_shutdown():
             try:
                 self.on_execute()
@@ -48,8 +59,12 @@ class ${node.name}_node():
                 traceback.print_exc()
             pass
 
-#foreach( $t in node.inTopics )
+#foreach( $t in ${node.inTopics} )
     def on_${t.name}(self, msg):
+        """
+        Subscribing Topic ${t.name}
+        """
+        # self._${t.name} = msg
         # print msg
         pass
 #end

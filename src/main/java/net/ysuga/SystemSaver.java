@@ -1,12 +1,16 @@
 package net.ysuga;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import net.ysuga.ros.ROSLaunch;
+import net.ysuga.ros.ROSMsg;
 import net.ysuga.ros.ROSNode;
 import net.ysuga.ros.ROSNodeInstance;
 import net.ysuga.ros.ROSPackage;
+import net.ysuga.ros.ROSParam;
+import net.ysuga.ros.ROSTopic;
 
 import com.change_vision.jude.api.inf.model.IAttribute;
 import com.change_vision.jude.api.inf.model.IBlock;
@@ -16,6 +20,7 @@ import com.change_vision.jude.api.inf.model.IItemFlow;
 import com.change_vision.jude.api.inf.model.INamedElement;
 import com.change_vision.jude.api.inf.model.IPackage;
 import com.change_vision.jude.api.inf.model.IPort;
+import com.change_vision.jude.api.inf.model.IValueAttribute;
 import com.change_vision.jude.api.inf.model.IValueType;
 
 public class SystemSaver {
@@ -49,11 +54,21 @@ public class SystemSaver {
 			String[] rosnode_stereotypes = {"rospy_node", "roscpp_node"};
 			for(String stereotype : rosnode_stereotypes) {
 				for (IAttribute part : AstahUtility.getStereoTypedParts((IBlock)roslaunch, stereotype)) {
+					ROSNode rosNode = createROSNode(pack, part, stereotype);
 					
-					ROSNode rosNode = new ROSNode(pack.getName(),
-							part.getName(), stereotype);
+					File srcpath = new File(fullpath, "src");
+					if (!srcpath.exists()) {
+						srcpath.mkdirs();
+					}
+					try {
+						rosNode.saveToDirectory(srcpath);
+					} catch (FileNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
 					ROSNodeInstance rosNodeInstance = createROSNodeInstance(
-							part, (IBlock)part.getType(), rosNode);
+							part, rosNode);
 					launchObj.addNodeInstance(rosNodeInstance);
 				}
 			}
@@ -66,17 +81,56 @@ public class SystemSaver {
 		}
 
 	}
+	
+	private static ROSNode createROSNode(IPackage pack, IAttribute part, String stereotype) {
+		IBlock node = (IBlock)part.getType();
+		ROSNode rosNode = new ROSNode(pack.getName(),
+				node.getName(), stereotype);
 
-	private static ROSNodeInstance createROSNodeInstance(IAttribute a,
-			IBlock node, ROSNode rosNode) {
+		for(IValueAttribute vp : node.getValueAttributes()) {
+			rosNode.addParam(new ROSParam(vp.getType().getFullName("/"), vp.getName(), vp.getInitialValue()));
+		}
+		
+		for(IPort port : node.getPorts()) {
+			for(IConnector connector : port.getConnectors()) {
+				if(connector instanceof IItemFlow) {
+					IValueType v = (IValueType)((IItemFlow)connector).getConveys()[0];
+					for(String s : v.getStereotypes()) {
+						IValueType topicType = null;
+						if (s.equals("rostopic")) {
+							topicType = (IValueType)v.getGeneralizations()[0].getSuperType();
+						} else {
+							if(s.equals("valueType")) {
+								continue;
+							}
+							topicType = v;
+						}
+						
+						if(connector.getPorts()[0].equals(port)) {
+							rosNode.addOutTopic(new ROSTopic(port.getName(), new ROSMsg(topicType.getFullName("/"))));
+						} else {
+							rosNode.addInTopic(new ROSTopic(port.getName(), new ROSMsg(topicType.getFullName("/"))));
+						}
+						
+					}
+				}
+			}
+		}
+		return rosNode;
+	}
+
+	private static ROSNodeInstance createROSNodeInstance(IAttribute part,
+			ROSNode rosNode) {
 		ROSNodeInstance rosNodeInstance = new ROSNodeInstance(
-				rosNode, a.getName());
-		for(IConstraint c : a.getConstraints()){
+				rosNode, part.getName());
+		for(IConstraint c : part.getConstraints()){
 			String[] vs = c.getName().split("=");
 			if(vs.length == 2) {
 				rosNodeInstance.addParam(vs[0].trim(), vs[1].trim());
 			}
 		}
+		
+		IBlock node = (IBlock)part.getType();
 		for(IPort port : node.getPorts()) {
 			for(IConnector connector : port.getConnectors()) {
 				if(connector instanceof IItemFlow) {
@@ -84,13 +138,6 @@ public class SystemSaver {
 					for(String s : v.getStereotypes()) {
 						if (s.equals("rostopic")) {
 							rosNodeInstance.addRemap(port.getName(), v.getName());
-							IValueType topicType = (IValueType)v.getGeneralizations()[0].getSuperType();
-							if(connector.getPorts().equals(port)) {
-								rosNode.addOutTopic(topicType.getName(), connector.getName());
-							} else {
-								rosNode.addInTopic(topicType.getName(), connector.getName());
-							}
-							
 						}
 					}
 				}

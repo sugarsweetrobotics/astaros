@@ -10,6 +10,11 @@ public class ROSTopic {
 		setName(name);
 		setType(type);
 	}
+	
+	@Override
+	public boolean equals(Object o) {
+		return name.equals(((ROSTopic)o).getName());
+	}
 
 	public String getName() {
 		return name;
