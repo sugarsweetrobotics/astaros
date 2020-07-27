@@ -100,10 +100,14 @@ public class RosMsgManager {
 	}
 	
 	public static boolean addValueType(IModel model, String fullname) {
+	    System.out.println("RosMsgManager.addValueType(" + fullname + ")");
 		if (Arrays.asList(primitiveTypes).contains(fullname)) {
+		    System.out.println(" - input message is primitive type.");
 			return true;
 		}
+		System.out.println(" - Astah calls 'rosmsg show " + fullname + "' command...");		
 		String output = ProcessManager.rosmsg_show(fullname);
+		System.out.println(" - Command output is :\n" + output + "\n");
 		if (!validateRosMsgOutput(output)) {
 			return false;
 		}
