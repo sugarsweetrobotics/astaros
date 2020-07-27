@@ -92,10 +92,11 @@ public class ProcessManager {
 	}
 
 	private static String getROSPath() {
-		return "/opt/ros" + System.getenv("ROS_DISTRO");
+		return "/opt/ros/" + System.getenv("ROS_DISTRO") + "/bin/";
 	}
 	
 	public static String rosmsg_show(String fullname) {
+	    System.out.println("ProcessManager.rosmsg_show(" + fullname + ")");
 		StringBuilder output = new StringBuilder();
 		List<String> arg = new ArrayList<String>();
 		arg.add("python");
@@ -103,6 +104,7 @@ public class ProcessManager {
 		arg.add(getROSPath() + "rosmsg");
 		arg.add("show");
 		arg.add(fullname);
+		System.out.println(" - full command str is '" + arg + "'");
 		ProcessBuilder pb = new ProcessBuilder(arg);
 		// pb.redirectErrorStream(true);
 		try {
@@ -112,6 +114,7 @@ public class ProcessManager {
 			p.waitFor();
 			while (true) {
 				String line = br.readLine();
+				System.out.println(" -- DEBUG:" + line + ")");
 				if (line == null) {
 					break;
 				} else {
@@ -121,9 +124,11 @@ public class ProcessManager {
 			}
 
 		} catch (IOException e) {
+		    System.out.println(" - Exception: IOException:" + e);
 			return null;
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
+		    System.out.println(" - Exception: InterruptedException:" + e);
 			e.printStackTrace();
 		}
 		return output.toString();
