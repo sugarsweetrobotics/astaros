@@ -20,6 +20,7 @@ public class ImportValueAction implements IPluginActionDelegate {
 
 	public Object run(IWindow window) throws UnExpectedException {
 		try {
+
 			AstahAPI api = AstahAPI.getAstahAPI();
 			ProjectAccessor projectAccessor = api.getProjectAccessor();
 			IModel model = projectAccessor.getProject();
@@ -28,7 +29,7 @@ public class ImportValueAction implements IPluginActionDelegate {
 			String str = JOptionPane.showInputDialog(window.getParent(),
 					"title", "msg");
 			if (str != null) {
-
+			    System.out.println("AstahROS importValueAction:" + str);
 				TransactionManager.beginTransaction();
 				RosMsgManager.addValueType(model, str);
 				TransactionManager.endTransaction();
